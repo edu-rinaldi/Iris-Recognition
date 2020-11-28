@@ -67,7 +67,7 @@ void isis::preprocess(cv::Mat& source, cv::Mat& out, const int& reflectionFilter
 {
     // Cropping sull'occhio
     if(needClassifier(source))
-        cropEye(source, source, HAARCASCADE_EYE_TREE_EYEGLASSES);
+        cropEye(source, source);
     
     // scala l'immagine per un miglioramento delle performance
     // TODO: forse va tolto, ma è molto utile su utiris

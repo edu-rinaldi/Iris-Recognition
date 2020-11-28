@@ -219,25 +219,18 @@ int main(int argc, const char * argv[])
         opt.get("-t")->getString(fpath);
         
         // Percorso non inserito
-        if(fpath.empty())
-        {
-            std::cerr<<"Non è stato inserito alcun percorso"<<std::endl;
-            return -1;
-        }
+        if(fpath.empty()) { std::cerr<<"Non è stato inserito alcun percorso"<<std::endl; return -1; }
         
+        // Leggi l'immagine
         auto source = cv::imread(fpath, cv::IMREAD_COLOR);
-        cv::Mat out;
         
         // Percorso non valido
-        if(source.empty())
-        {
-//            std::cerr<<"L'immagine selezionata: "<<fpath<<" non è stata trovata o non è valida"<<std::endl;
-            return -1;
-        }
-//        std::cout<<"L'immagine presa in considerazione è "<<fpath<<std::endl<<std::endl;
+        if(source.empty()) { std::cerr<<"L'immagine selezionata: "<<fpath<<" non è stata trovata o non è valida"<<std::endl; return -1; }
+        std::cout<<"L'immagine presa in considerazione è "<<fpath<<std::endl<<std::endl;
         
-        isis::needClassifier(source);
-        std::cout<<std::filesystem::current_path()<<std::endl;
+        cv::Mat out;
+        isis::filterReflection(source, out, SIMPLE_THRESHOLD);
+        
         
     }
     else

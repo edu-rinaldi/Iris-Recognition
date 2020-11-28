@@ -110,17 +110,23 @@ void isis::filterReflection(const cv::Mat& src, cv::Mat& out, const int& mode)
     cv::inpaint(src, mask, out, 5, cv::INPAINT_TELEA);
 }
 
-void isis::cropEye(const cv::Mat& src, cv::Mat& out, const std::string& classifierPath)
+void isis::cropEye(const cv::Mat& src, cv::Mat& out)
 {
-    auto eyeCascadeClassifier = cv::CascadeClassifier(classifierPath);
-    auto eyes = std::vector<cv::Rect>();
-    eyeCascadeClassifier.detectMultiScale(src, eyes);
+    auto eyes = isis::getROI(src, isis::HAARCASCADE_EYE_TREE_EYEGLASSES);
     
     if(eyes.size() == 0) return;
     
     // Prendo l'occhio con l'area più grande
     cv::Rect eye = *std::max_element(eyes.begin(), eyes.end(), [](const cv::Rect& l, const cv::Rect& r){ return l.area() < r.area(); });
     out = eye.width < 120 ? src : src(eye);
+}
+
+std::vector<cv::Rect> isis::getROI(const cv::Mat& src, const std::string& classifierPath)
+{
+    auto eyeCascadeClassifier = cv::CascadeClassifier(classifierPath);
+    auto eyes = std::vector<cv::Rect>();
+    eyeCascadeClassifier.detectMultiScale(src, eyes);
+    return eyes;
 }
 
 void isis::blurFilter(const cv::Mat& mat, cv::Mat& out, const int& windowSize, const int& n)

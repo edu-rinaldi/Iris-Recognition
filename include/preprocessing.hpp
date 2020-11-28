@@ -29,7 +29,8 @@ void filterReflectionST(const cv::Mat& src, cv::Mat& mask);
 void filterReflectionAT(const cv::Mat& src, cv::Mat& mask);
 void filterReflection(const cv::Mat& src, cv::Mat& out, const int& mode = SIMPLE_THRESHOLD);
 
-void cropEye(const cv::Mat& src, cv::Mat& out, const std::string& classifierPath);
+void cropEye(const cv::Mat& src, cv::Mat& out);
+std::vector<cv::Rect> getROI(const cv::Mat& src, const std::string& classifierPath);
 
 void blurFilter(const cv::Mat& mat, cv::Mat& out,const int& windowSize, const int& n);
 
