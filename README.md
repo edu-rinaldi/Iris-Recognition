@@ -33,6 +33,8 @@ For example:
 ./iris -e /usr/foo/Desktop/my_iris.png
 ```
 
+The segmented iris will be stored in `segmentation` folder (which is located in your build folder, ex.: `iris/build/Release/segmentation/`).
+
 ### Recognize
 If you want to get the top 5 most similar iris to the one given in input you can run the code with `-r` flag:
 ```bash
