@@ -11,6 +11,8 @@
 
 #include <string>
 
+// ATTUALMENTE QUESTO FILE NON VIENE UTILIZZATO
+
 const bool EYE_CROPPING = true;
 const double RESIZE_VALUE = 1;
 const int POSTERIZE_VALUE = 5;

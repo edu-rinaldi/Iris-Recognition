@@ -11,32 +11,70 @@ using namespace isis;
 
 Circle::Circle() : radius(0), center(0) {}
 
+/*
+    @param radius: raggio del cerchio
+    @param center: coordinata che indica il centro del cerchio
+ */
 Circle::Circle(const double& radius, const cv::Point& center) : radius(radius), center(center) {}
 
-// True se il cerchio è nel rettangolo r
+/*
+    @param r: oggetto di tipo rettangolo (classe di OpenCV)
+    @return true se il cerchio è all'interno del rettangolo r, false altrimenti
+ */
 bool Circle::inside(const cv::Rect& r) const
 {
     return center.x - radius > r.tl().x && center.y - radius > r.tl().y &&
     center.x + radius <= r.br().x && center.y + radius <= r.br().y;
 }
 
-// True se il cerchio è nella matrice mat
+/*
+    @param mat: immagine
+    @return true se il cerchio è all'interno dell'immagine mat, false altrimenti
+ */
 bool Circle::inside(const cv::Mat& mat) const {return inside(cv::Rect(cv::Point(0,0), mat.size()));}
 
-// True se il punto in coordinate (x,y) è nel cerchio
+/*
+    @param x: coordinata x
+    @param y: coordinata y
+    @return true se il punto in coordinate (x, y) è all'interno del cerchio, false altrimenti
+ */
 bool Circle::inside(const int& x, const int& y) const { return distance(cv::Point(x, y), center) < radius;}
+
+/*
+    Dato un range di raggi dice se il raggio del cerchio è all'interno di questo range.
+    @param sradius: valore di inizio del range (inclusivo)
+    @param eradius: valore di fine del range (inclusivo)
+    @return true se il raggio del cerchio assume un valore nel range [sradius, eradius], false altrimenti
+ */
 bool Circle::radiusInside(const double& sradius, const double& eradius) const {return radius>= sradius && radius <= eradius;}
 
-
+/*
+    @return la bounding box del cerchio
+ */
 cv::Rect Circle::getbbox() const
 {
     return cv::Rect(cv::Point(this->center.x - this->radius, this->center.y - this->radius), cv::Size(this->radius * 2, this->radius * 2));
 }
 
+/*
+    Calcola il valore di omogeneità del cerchio per l'immagine passata in input
+    @param src: immagine
+    @return valore di omogeneità
+ */
 double Circle::homogeneity(const cv::Mat& src) const { return homogeneity(src, *this); }
 
+/*
+    Calcola il valore di separabilità del cerchio per l'immagine passata in input
+    @param src: immagine
+    @return valore di separabilità
+ */
 double Circle::separability(const cv::Mat& src) const { return separability(src, *this); }
 
+/*
+    Data un'immagine, prende tutti i pixel interni al cerchio e restituisce il valore medio
+    @param src: immagine
+    @return valore medio
+ */
 double Circle::mean(const cv::Mat& src) const
 {
     double mean = 0;
@@ -57,6 +95,12 @@ double Circle::mean(const cv::Mat& src) const
     return mean;
 }
 
+/*
+    Data un "contorno" restituisce il cerchio che meglio lo approssima
+    @param contour: una lista di punti che compongono un contorno
+    @return il cerchio che meglio approssima il contorno
+    
+ */
 Circle Circle::taubin(const std::vector<cv::Point>& contour)
 {
     cv::Point2d sum = {0,0};
@@ -94,7 +138,7 @@ Circle Circle::taubin(const std::vector<cv::Point>& contour)
 
     for(int i=0; i<6; i++) m[i] /= contour.size();
 
-    // computing coeff
+    // coeff
     double  mz = m[0] + m[1],
     cov_xy = m[0] * m[1] - cv::pow(m[2], 2),
     var_z = m[5] - cv::pow(mz, 2),
@@ -107,9 +151,8 @@ Circle Circle::taubin(const std::vector<cv::Point>& contour)
     x = 0.,
     y = a0;
 
-    // finding the root of the characteristic polynomial
-    // using Newton's method starting at x=0
-    // (it is guaranteed to converge to the right root)
+    // ricerca della radice del polinomio caratteristico usando il metodo di newton partendo da x=0
+    // (è garantito che converge sulla giusta radice)
     for(int i=0; i<99; i++)
     {
         double dy = a1 + x * (a22 + a33 * x);
@@ -123,17 +166,23 @@ Circle Circle::taubin(const std::vector<cv::Point>& contour)
         y = ynew;
     }
 
-    // computing paramters of the fitting circle
+    // calcolo dei parametri del cerchio
     double det = cv::pow(x, 2) - x * mz + cov_xy,
     xcenter = (m[3] * (m[1] - x) - m[4] * m[2]) / det / 2.,
     ycenter = (m[4] * (m[0] - x) - m[3] * m[2]) / det / 2.;
 
-    // assembling the output
+    // creo l'output
     double radius = cv::sqrt(cv::pow(xcenter, 2) + cv::pow(ycenter, 2) + mz);
     return Circle(radius, cv::Point(xcenter+mean.x, ycenter + mean.y));
 
 }
 
+/*
+    Funzione statica per il calcolo del valore di omogeneità
+    @param src: immagine
+    @param c: cerchio
+    @return valore di omogeneità
+ */
 double Circle::homogeneity(const cv::Mat& src, const Circle& circle)
 {
     // Calcolo la maschera del cerchio
@@ -144,7 +193,7 @@ double Circle::homogeneity(const cv::Mat& src, const Circle& circle)
     // Calcolo l'histogram su quel cerchio
     int channels[] = {0};
     int histSize[] = {256};
-    // Set ranges for histogram bins
+    
     float lranges[] = {0, 256};
     const float* ranges[] = {lranges};
     cv::Mat hist;
@@ -165,6 +214,12 @@ double Circle::homogeneity(const cv::Mat& src, const Circle& circle)
     return max_val / total_px;
 }
 
+/*
+    Funzione statica per il calcolo del valore di separabilità
+    @param src: immagine
+    @param c: cerchio
+    @return valore di separabilità
+ */
 double Circle::separability(const cv::Mat &src, const Circle &c)
 {
     // Array che mantiene le differenze per ogni angolo
@@ -212,7 +267,9 @@ double Circle::separability(const cv::Mat &src, const Circle &c)
     return mean / (stddev + 1);
 }
 
-
+/*
+    Output stream per consentire l'utilizzo di std::cout
+ */
 std::ostream& operator<<(std::ostream& os, Circle c)
 {
     os <<"Center: "<<c.center<<" Radius: "<<c.radius;

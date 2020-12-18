@@ -8,6 +8,10 @@
 
 #include "iris_encoding.hpp"
 
+/*
+    Funzione utilizzata per LBP.
+    Calcola il valore del pixel in base ai vicini (viene utilizzata la sommatoria sugli 8 pixel vicini)
+ */
 int isis::getCalculatedPixel(const cv::Mat& src, const int& y, const int& x)
 {
     int center = src.at<uchar>(y, x);
@@ -28,6 +32,11 @@ int isis::getCalculatedPixel(const cv::Mat& src, const int& y, const int& x)
     return val;
 }
 
+/*
+    Funzione che applica l'operatore LBP
+    @param src: immagine in input su cui applicare LBP
+    @param out: immagine su cui vogliamo mettere l'output ottenuto applicando LBP.
+ */
 void isis::applyLBP(const cv::Mat& src, cv::Mat& out)
 {
     cv::Mat tmp;
@@ -38,6 +47,11 @@ void isis::applyLBP(const cv::Mat& src, cv::Mat& out)
             out.at<uchar>(y, x) = getCalculatedPixel(tmp, y, x);
 }
 
+/*
+    Effettua la codifica LBP.
+    @param out: struct lbp vuota, in questa verrà messo l'output della funzione
+    @param s: struct contenente la segmentazione dell'iride da codificare
+ */
 void isis::encodeLBP(lbp_t& out, const segmentation_t& s)
 {
     applyLBP(s.normalized, out.img);
@@ -50,7 +64,6 @@ void isis::encodeLBP(lbp_t& out, const segmentation_t& s)
         //da 0 a 255
         int histSize = 256;
         
-        // range esclusivo
         float range[] = { 0, 256 }; // range esclusivo
         const float* histRange = { range };
         cv::Mat currentZone = out.img(cv::Range(zone * subRows, (zone+1) * subRows), cv::Range(0, out.img.cols));
@@ -59,6 +72,9 @@ void isis::encodeLBP(lbp_t& out, const segmentation_t& s)
     }
 }
 
+/*
+    Date due codifiche restituisce il valore di similarità
+ */
 double isis::matchLBP(const lbp_t& c1, const lbp_t& c2)
 {
     double score = 0;
@@ -75,6 +91,11 @@ double isis::matchLBP(const lbp_t& c1, const lbp_t& c2)
     return score / NUM_ZONE;
 }
 
+/*
+    Effettua la codifica spatiogram
+    @param out: struct spatiogram vuota, in questa verrà messo l'output della funzione
+    @param s: struct contenente la segmentazione dell'iride da codificare
+ */
 void isis::encodeSpatiogram(spatiogram_t &out, const segmentation_t &s)
 {
     int bins = 256;
@@ -182,6 +203,9 @@ void isis::encodeSpatiogram(spatiogram_t &out, const segmentation_t &s)
     
 }
 
+/*
+    Date due codifiche spatiogram restituisce un valore di dissimilarità
+ */
 double isis::matchSpatiogram(const spatiogram_t &c1, const spatiogram_t &c2)
 {
     cv::Mat qx = cv::Mat::zeros(c1.sigmaX.size(), CV_64FC1),
