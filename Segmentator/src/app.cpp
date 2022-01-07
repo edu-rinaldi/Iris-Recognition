@@ -36,9 +36,9 @@ int main(int argc, const char* argv[])
 {
 
     ez::ezOptionParser opt;
-    opt.overview = "ISISv2 segmentation method.";
-    opt.syntax = "isis (-s|-ds) inputImage";
-    opt.example = "isis -s image.png\n\n";
+    opt.overview = "Segmentation application";
+    opt.syntax = "SegmentatorApp (--in|-i) \"inputImage\" [(--out|-o) \"outputDirectory\"] [--method|-mt (\"hough\"|\"isis\")] [--size|-sz n] [--mode|-m (\"debug\"|\"segmentation\")]";
+    opt.example = "SegmentatorApp --in image.png\n\n";
     opt.footer = "------------------------\n";
 
     opt.add("hough", false, 1, ' ', "Iris segmentation method", "-mt", "--method");
@@ -46,7 +46,17 @@ int main(int argc, const char* argv[])
     opt.add("debug", false, 1, ' ', "App mode: debug segmentation or save segmentation", "-m", "--mode");
     opt.add("", true, 1, ',', "Input image", "-i", "--in", "--input");
     opt.add("", false, 1, ',', "Output image", "-o", "--out");
+    opt.add("", false, 1, ',', "Help", "-h", "--help");
     opt.parse(argc, argv);
+
+    std::vector<std::string> badopt;
+    if (opt.isSet("-h") || !opt.gotRequired(badopt))
+    {
+        std::string usage;
+        opt.getUsage(usage);
+        std::cout << usage << std::endl;
+        return -1;
+    }
 
     AppParams params;
     // Iris segmentation method
