@@ -1,5 +1,8 @@
 # Iris-Recognition
-This is a project which implements ISis v2 segmentation module and combined operators LBP and Spatiogram for recognition.
+Iris recognition system based on:
+* ISis v2 segmentation method
+* Hough gradient segmentation method
+* LBP Operator for feature extraction
 
 ## How to install
 I reccomend using CMake-GUI because it's easier, anyway you must have [OpenCV](https://opencv.org/) installed on your machine.
