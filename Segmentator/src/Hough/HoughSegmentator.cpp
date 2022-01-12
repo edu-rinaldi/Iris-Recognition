@@ -29,6 +29,11 @@ SegmentationData HoughSegmentator::Segment(const cv::Mat& src) const
 	}
 	
 	record.iris = IrisCircles(img);
+	if (!record.iris.isValid())
+	{
+		LOG("Iris not found");
+		return {};
+	}
 	auto& iris = record.iris;
 
 	iris.limbus = TransformCircle(iris.limbus, preprocessInfo.scale.to, preprocessInfo.scale.from);
@@ -137,7 +142,7 @@ float getAlphaRadius(const std::vector<cv::Vec3f>& circles)
 	return alphaRadius;
 }
 
-std::vector<cv::Vec3f> filterCircles(const std::vector<cv::Vec3f>& circles)
+std::vector<cv::Vec3f> filterCircles(std::vector<cv::Vec3f>& circles)
 {
 	cv::Vec3d mean, std;
 	cv::meanStdDev(circles, mean, std);
@@ -165,13 +170,13 @@ std::vector<cv::Vec3f> filterCircles(const std::vector<cv::Vec3f>& circles)
 		cv::meanStdDev(filteredPos, filteredMean, filteredStd);
 		float maxRadius = alphaRadius + filteredStd[2];
 		float minRadius = alphaRadius - filteredStd[2];
-		std::mutex m;
-		std::for_each(std::execution::par, circles.begin(), circles.end(), [&](auto& circle)
+		//std::mutex m;
+		auto it = std::remove_if(circles.begin(), circles.end(), [&](auto& circle) {return !(circle[2] >= minRadius && circle[2] <= maxRadius); });
+		std::atomic_int idx = 0;
+		filtered.resize(static_cast<int>(std::distance(circles.begin(), it)));
+		std::for_each(std::execution::par, circles.begin(), it, [&](auto& circle)
 		{
-			if (circle[2] >= minRadius && circle[2] <= maxRadius) {
-				std::lock_guard<std::mutex> guard(m);
-				filtered.push_back(circle);
-			}
+			filtered[idx.fetch_add(1)] = circle;
 		});
 	}
 	return filtered;

@@ -31,7 +31,11 @@ SegmentationData IsisSegmentator::Segment(const cv::Mat& src) const
 	automaticBrightnessContrast(img, img);
 
 	record.iris = IrisCircles(img);
-
+	if (!record.iris.isValid())
+	{
+		LOG("Iris not found");
+		return {};
+	}
 	auto& iris = record.iris;
 
 	iris.limbus = TransformCircle(iris.limbus, preprocessInfo.scale.to, preprocessInfo.scale.from);
