@@ -5,4 +5,3 @@ set(CMAKE_CXX_STANDARD 17)
 set(EZPARSER_INLCUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/Ext/ezOptionParser)
 
 add_subdirectory(Segmentator)
-add_subdirectory(LBP)
