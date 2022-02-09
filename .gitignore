@@ -4,6 +4,4 @@ build/**
 .DS_Store
 **/.DS_Store
 
-**/*.pth
-*.pth
 **/__pycache__
