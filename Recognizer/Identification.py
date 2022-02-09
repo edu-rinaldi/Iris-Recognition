@@ -11,6 +11,7 @@ from scipy.spatial.distance import pdist
 
 from Enrollment import Dataset, FeatureExtractor
 from Models.VGGFE import VGGFE
+from Models.FeatNetFE import FeatNet
 
 
 class SubjectIdentifier:
@@ -58,12 +59,15 @@ if __name__ == '__main__':
     args = vars(parser.parse_args())
     inputImagePath = args['in'][0]
     datasetPath = args['dataset'][0]
-    if 'at' in args:
+    if 'at' in args and args['at'] != None:
         at = args['at'][0]
     else:
         at = None
-    vggfe = VGGFE(pretrainedName='vggfe_lr0001_100e.pth')
-    featureExtractor = FeatureExtractor(vggfe)
+    
+    # vggfe = VGGFE(pretrainedName='vggfe_lr0001_100e.pth')
+    featNet = FeatNet(pretrainedName="featNetTriplet_100e_1e-4lr.pth").eval()
+
+    featureExtractor = FeatureExtractor(featNet)
     dataset = Dataset(datasetPath, featureExtractor)
     subjectIdentifier = SubjectIdentifier(dataset, at)
 

@@ -6,6 +6,7 @@ from scipy.spatial.distance import pdist
 
 from Enrollment import Dataset, FeatureExtractor
 from Models.VGGFE import VGGFE
+from Models.FeatNetFE import FeatNet
 
 
 class IdentityVerifier:
@@ -51,8 +52,11 @@ if __name__ == '__main__':
     inputImagePath = args['in'][0]
     claimedIdentity = args['id'][0]
     datasetPath = args['dataset'][0]
-    vggfe = VGGFE(pretrainedName='vggfe_lr0001_100e.pth')
-    featureExtractor = FeatureExtractor(vggfe)
+    
+    featNet = FeatNet(pretrainedName="featNetTriplet_100e_1e-4lr.pth").eval()
+    # vggfe = VGGFE(pretrainedName='vggfe_lr0001_100e.pth')
+    
+    featureExtractor = FeatureExtractor(featNet)
     dataset = Dataset(datasetPath, featureExtractor)
     identityVerifier = IdentityVerifier(dataset)
 

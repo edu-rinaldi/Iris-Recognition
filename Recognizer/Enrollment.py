@@ -5,6 +5,7 @@ from ast import arg
 
 from Segmentation.Segmentation import Segmentator
 from Models.VGGFE import VGGFE
+from Models.FeatNetFE import FeatNet
 from torchvision.io import read_image
 from torchvision import transforms
 
@@ -85,7 +86,9 @@ if __name__ == "__main__":
     claimedIdentity = args['id'][0]
     datasetPath = args['dataset'][0]
 
-    vggfe = VGGFE("vggfe_lr0001_100e.pth").eval()
-    featureExtractor = FeatureExtractor(vggfe)
+    # vggfe = VGGFE("vggfe_lr0001_100e.pth").eval()
+    featNet = FeatNet(pretrainedName="featNetTriplet_100e_1e-4lr.pth").eval()
+    
+    featureExtractor = FeatureExtractor(featNet)
     dataset = Dataset(datasetPath, featureExtractor)
     dataset.enrollSubject(inputImagePath, claimedIdentity)

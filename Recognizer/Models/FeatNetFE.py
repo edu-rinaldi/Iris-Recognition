@@ -1,6 +1,8 @@
 import os
 from collections import OrderedDict
+import torch
 from torch import nn, load
+from torch.nn import functional as F
 
 class FeatNet(nn.Module):
     def __init__(self, pretrainedName=""):
