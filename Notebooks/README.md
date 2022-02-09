@@ -1,0 +1,2 @@
+# Iris feature extraction
+In this directory you can find a notebook where I explain in detail each step to arrive at the proposed models. Unfortunately, as the dataset is private I cannot provide a direct download to it.

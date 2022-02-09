@@ -2,10 +2,10 @@
 Unlike the others, I decided to create this module in C++17 because it allows me to carry out numerous low-level optimisations.
 
 Two segmentation modules have been implemented:
-1. *"ISis v.2"*, code available in the directory "`Segmentator/src/Isis`".
-2. *"Hough approach"*, code available in the directory "`Segmentator/src/Hough`".
+1. *"ISis v.2"*, code available in the directory "`SegmentationModule/Segmentator/src/Isis`".
+2. *"Hough approach"*, code available in the directory "`SegmentationModule/Segmentator/src/Hough`".
 
-A high level description of how they work is available in the directory "`Report`", basically both implement an interface described in "`Segmentator/src/Segmentation.h`".
+A high level description of how they work is available in the directory "`Report`", basically both implement an interface described in "`SegmentationModule/Segmentator/src/Segmentation.h`".
 
 
 ## Build
