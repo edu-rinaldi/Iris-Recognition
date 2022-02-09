@@ -13,6 +13,7 @@ struct ComparePoints
 template<typename KeyT, typename ValT>
 using map = std::map<KeyT, ValT, ComparePoints>;
 
+// Contains all information about normalized segmented iris image
 struct NormalizedIris
 {
     cv::Mat eye;
@@ -24,6 +25,13 @@ struct NormalizedIris
 
 struct Iris;
 
+/**
+* Normalize eye cropped image, giving as input iris circles
+*
+* @param eye: Eye cropped image
+* @param iris: iris circles
+* @return NormalizedIris struct containing all normalization informations
+*/
 NormalizedIris normalizeIris(const cv::Mat& eye, const Iris& iris);
 
 };

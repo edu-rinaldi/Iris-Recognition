@@ -11,17 +11,25 @@
 namespace erb 
 {
 
+// Contains all information about a segmentation process
 struct SegmentationData
 {
 	Iris iris;
 	NormalizedIris irisNormalized;
 };
 
+// Interface
 class Segmentator
 {
 public:
 	virtual SegmentationData Segment(const cv::Mat& img) const = 0;
 protected:
+	/*
+	* Convert circle from one coordinate system to another
+	* @param circle: circle to convert
+	* @param from: actual circle coordinate system (size of the image)
+	* @param to: destination coordinate system
+	*/
 	inline Circle TransformCircle(const Circle& circle, const cv::Size& from, const cv::Size& to) const
 	{
 		Circle nc;

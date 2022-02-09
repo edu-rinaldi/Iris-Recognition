@@ -17,18 +17,24 @@ SegmentationData HoughSegmentator::Segment(const cv::Mat& src) const
 	SegmentationData record;
 	cv::Mat img; 
 	src.copyTo(img);
+	// If image is not grayscale convert it 
 	if (img.channels() > 1)
 		cv::cvtColor(img, img, cv::COLOR_BGR2GRAY);
 
+	// Preprocess image
 	auto preprocessInfo = preprocessImage(img, img, mFinalSize);
 
+	// Crop failed check
 	if (!preprocessInfo.crop.success)
 	{
 		LOG("Crop failed");
 		return {};
 	}
 	
+	// Find iris circles
 	record.iris = IrisCircles(img);
+
+	// If iris is not valid (i.e. process failed)
 	if (!record.iris.isValid())
 	{
 		LOG("Iris not found");
@@ -36,11 +42,13 @@ SegmentationData HoughSegmentator::Segment(const cv::Mat& src) const
 	}
 	auto& iris = record.iris;
 
+	// Transform circle to original image size coordinate system
 	iris.limbus = TransformCircle(iris.limbus, preprocessInfo.scale.to, preprocessInfo.scale.from);
 	iris.pupil = TransformCircle(iris.pupil, preprocessInfo.scale.to, preprocessInfo.scale.from);
 	
 	img = src(preprocessInfo.crop.roi);
 
+	// Normalize iris
 	record.irisNormalized = normalizeIris(img, iris);
 	
 	return record;

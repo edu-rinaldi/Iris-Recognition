@@ -6,11 +6,11 @@ namespace erb {
 
 double homogeneity(const cv::Mat& src, const Circle& circle)
 {
-    // Calcolo la maschera del cerchio
+    // Calculating the circle mask
     cv::Mat circleMask = cv::Mat::zeros(src.size(), CV_8UC1);
     cv::circle(circleMask, circle.center, circle.radius, cv::Scalar(255), -1);
 
-    // Calcolo l'histogram su quel cerchio
+    // Calculating the histogram on that circle
     int channels[] = { 0 };
     int histSize[] = { 256 };
 
@@ -19,7 +19,7 @@ double homogeneity(const cv::Mat& src, const Circle& circle)
     cv::Mat hist;
     cv::calcHist(&src, 1, channels, circleMask, hist, 1, histSize, ranges, true, false);
 
-    // Uso la formula per l'omogeneità
+    // I use the formula for homogeneity
     double totalPx = 0, maxVal = 0, color = 0;
     for (int i = 0; i < hist.rows; i++)
     {
@@ -36,48 +36,48 @@ double homogeneity(const cv::Mat& src, const Circle& circle)
 
 double separability(const cv::Mat& src, const Circle& c)
 {
-    // Array che mantiene le differenze per ogni angolo
+    // Array keeping differences for each angle
     double indexes[360];
 
-    // totale differenze
+    // total differences
     double total = 0;
 
-    // Per ogni angolo
+    // For every angle
     for (int i = 0; i < 360; i++)
     {
-        // Ascissa interna, settata a 4/5 del raggio
+        // Internal abscissa, set to 4/5 of the radius
         int xInt = (int)(c.center[0] + c.radius * 0.8 * cos(degToRad(i)));
-        // Ascissa esterna, settata a 6/5 del raggio
+        // External abscissa, set at 6/5 of the radius
         int xExt = (int)(c.center[0] + c.radius * 1.2 * cos(degToRad(i)));
-        // Ordinata interna, settata a 4/5 del raggio
+        // Internal ordinate, set at 4/5 of the radius
         int yInt = (int)(c.center[1] + c.radius * 0.8 * sin(degToRad(i)));
-        // Ordinata esterna, settata a 6/5 del raggio
+        // Outer ordinate, set at 6/5 of the radius
         int yExt = (int)(c.center[1] + c.radius * 1.2 * sin(degToRad(i)));
 
-        // Corregge il tiro qualora le coordinate esterne finiscano fuori dalla matrice
+        // Corrects if external coordinates end up outside the matrix
         xExt = xExt < 0 ? 0 : xExt;
         yExt = yExt < 0 ? 0 : yExt;
         xExt = xExt >= src.cols ? src.cols - 1 : xExt;
         yExt = yExt >= src.rows ? src.rows - 1 : yExt;
 
-        // Ottiene la differenza tra le intensità interna ed esterna
+        // Gets the difference between internal and external intensities
         indexes[i] = abs(src.at<uchar>(yExt, xExt) - src.at<uchar>(yInt, xInt));
 
-        // Aggiorna la somma delle differenze
+        // Update sum of differences
         total += indexes[i];
 
     }
-    // Differenza media rispetto agli angoli
+    // Average difference in angles
     double mean = total / 360.;
 
-    // Calcolo della deviazione standard
+    // Calculation of standard deviation
     double sum = 0;
     for (int i = 0; i < 360; i++)
         sum += cv::pow((indexes[i] - mean), 2);
 
     double stddev = sqrt(sum / 360.);
 
-    // Restituisce il valore medio diviso per la (deviazione standard + 1)
+    // Returns the mean value divided by the (standard deviation + 1)
     return mean / (stddev + 1);
 }
 

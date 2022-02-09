@@ -169,15 +169,6 @@ void findCirclesTaubin(const cv::Mat& mat, std::vector<Circle>& outputCircles, d
 					outputCircles.push_back(circle);
 				}
 			});
-		//for (std::vector<cv::Point>& contour : contours)
-		//{
-		//	// controlla cerchio
-		//	if (contour.size() <= 5) continue;
-		//	Circle circle = taubin(contour);
-
-		//	if (circle.inside(mat) && circle.radius >= minRadius && circle.radius <= maxRadius)
-		//		outputCircles.push_back(circle);
-		//}
 	}
 }
 
@@ -196,17 +187,7 @@ CircleSearchRecord findLimbus(const cv::Mat& mat, const std::vector<Circle>& cir
 		if (bestCircle.circle.radius == 0 || bestCircle.score < score)
 			bestCircle = { circle, score };
 	});
-	//for (const Circle& circle : circles)
-	//{
-	//	// homogeneity
-	//	double homogeneityScore = homogeneity(mat, circle);
-	//	// separability
-	//	double separabilityScore = separability(mat, circle);
-	//	double score = homogeneityScore + separabilityScore;
-	//	//std::lock_guard<std::mutex> guard(m);
-	//	if (bestCircle.circle.radius == 0 || bestCircle.score < score)
-	//		bestCircle = { circle, score };
-	//}
+
 	return bestCircle;
 }
 
@@ -248,13 +229,7 @@ CircleSearchRecord findPupil(const cv::Mat& mat, std::vector<Circle>& circles, c
 		std::lock_guard<std::mutex> guard(m);
 		if (score > bestCircle.score) bestCircle = { c, score };
 	});
-	/*for (const Circle& c : circles)
-	{
-		double homogeneityScore = homogeneity(mat, c);
-		double separabilityScore = separability(mat, c);
-		double score = homogeneityScore + separabilityScore;
-		if (score > bestCircle.score) bestCircle = { c, score };
-	}*/
+
 	if (bestCircle.circle.radius == 0)
 		bestCircle = { defaultCircle, homogeneity(mat, defaultCircle) + separability(mat, defaultCircle) };
 
@@ -279,8 +254,6 @@ Circle IsisSegmentator::PupilCircle(const cv::Mat& img, const Circle& limbus) co
 			if (mean(posterized, circles[i]) > 40.0
 				|| !circles[i].inside(centerCrop.x, centerCrop.y)
 				|| distance(circles[i].center, centerCrop) > 0.05 * limbusCropped.rows
-				//||  bestLimbus.radius / circles[i].radius < 1.7 
-				//||  bestLimbus.radius / circles[i].radius > 5.0
 				)
 				circles.erase(circles.begin() + i);
 		}

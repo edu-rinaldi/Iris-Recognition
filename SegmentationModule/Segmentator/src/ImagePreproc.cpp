@@ -24,7 +24,7 @@ CropEyeInfo automaticCrop(const cv::Mat& src, cv::Mat& out)
         return info; 
     }
 
-    // Prendo l'occhio con l'area più grande
+    // I take the eye with the largest area
     info.roi = *std::max_element(eyes.begin(), eyes.end(), [](const cv::Rect& l, const cv::Rect& r) { return l.area() < r.area(); });
     if (info.roi.width < 120) 
     {
@@ -65,12 +65,12 @@ void filterReflection(const cv::Mat& src, cv::Mat& out)
     cv::Mat mask = cv::Mat(src.size(), CV_8UC1);
     cv::Mat greySrc;
     cv::cvtColor(src, greySrc, cv::COLOR_BGR2GRAY);
-    // Pixel piu acceso
+    // Pixel brighter
     double brightestPixel;
     cv::minMaxLoc(greySrc, nullptr, &brightestPixel);
 
 
-    // Crea maschera
+    // Create mask
     cv::threshold(greySrc, mask, brightestPixel * 0.93, brightestPixel, cv::THRESH_BINARY);
     cv::dilate(mask, mask, cv::getStructuringElement(0, cv::Size(7, 7)));
     cv::inpaint(src, mask, out, 5, cv::INPAINT_TELEA);
@@ -94,19 +94,19 @@ void automaticBrightnessContrast(const cv::Mat& src, cv::Mat& out)
 
     // Locate points to clip
     float maximum = accumulator.back();
-    float clip_hist_percent = (maximum / 100.0f) * 0.5f;
+    float clipHistPercent = (maximum / 100.0f) * 0.5f;
 
     // Locate left cut
-    int minimum_gray = 0;
-    while (accumulator[minimum_gray] < clip_hist_percent) minimum_gray += 1;
+    int minimumGray = 0;
+    while (accumulator[minimumGray] < clipHistPercent) minimumGray += 1;
 
     // Locate right cut
-    int maximum_gray = 255;
-    while (accumulator[maximum_gray] >= (maximum - clip_hist_percent)) maximum_gray -= 1;
+    int maximumGray = 255;
+    while (accumulator[maximumGray] >= (maximum - clipHistPercent)) maximumGray -= 1;
 
     // Calculate alpha and beta values
-    float alpha = 255.f / (maximum_gray - minimum_gray);
-    float beta = -minimum_gray * alpha;
+    float alpha = 255.f / (maximumGray - minimumGray);
+    float beta = -minimumGray * alpha;
 
     cv::convertScaleAbs(src, out, alpha, beta);
     //auto_result = cv2.convertScaleAbs(image, alpha=alpha, beta=beta)
@@ -136,17 +136,17 @@ void posterization(const cv::Mat& src, cv::Mat& out, int k)
     out = cv::Mat::zeros(src.rows, src.cols, src.type());
     int x = 0;
 
-    // Per ogni riga
+    // For each row
     for (int y = 0; y < src.rows; y++)
     {
-        // Inizializzo un nuovo histogram e una nuova sliding window grande (k*2+1)^2
+        // I initialise a new histogram and a new sliding window of size (k*2+1)^2
         auto histo = std::unordered_map<uchar, int>();
         SlidingWindow slidingWindow = SlidingWindow::getSlidingWindow(src, y, x, k);
 
-        // topcolor è il colore più frequente
+        // topcolor is the most frequent colour
         int topColor = -1;
 
-        // calcola histogram nella finestra
+        // calculate histogram in the window
         for (int ty = slidingWindow.sy; ty < slidingWindow.ey; ty++)
         {
             for (int tx = slidingWindow.sx; tx < slidingWindow.ex; tx++)
@@ -158,30 +158,30 @@ void posterization(const cv::Mat& src, cv::Mat& out, int k)
             }
         }
 
-        // Setta il colore del pixel nella prima colonna dell'immagine con quello più frequente
+        // Sets the colour of the pixel in the first column of the image to the most frequent one
         out.at<uchar>(y, x) = topColor;
 
-        // Per le altre colonne
+        // For other columns
         for (int x = 1; x < src.cols; x++)
         {
             auto newSlidingWindow = SlidingWindow::getSlidingWindow(src, y, x, k);
-            // Scorri per ogni riga della sliding window
+            // Scroll for each line of the sliding window
             for (int ty = slidingWindow.sy; ty < slidingWindow.ey; ty++)
             {
-                // Elimina dall'histogram le occorrenze dei pixel della prima colonna della sliding window
+                // Deletes the occurrences of the pixels in the first column of the sliding window from the histogram.
                 histo[src.at<uchar>(ty, slidingWindow.sx)] -= 1;
 
-                // fai scorrere la finestra a destra
+                // scroll the window to the right
 //                slidingWindow = SlidingWindow::getSlidingWindow(src, y, x, k);
 
-                // Prendi il colore nell'ultima colonna e aggiorna l'histogram
-                auto color_tmp = src.at<uchar>(ty, newSlidingWindow.ex - 1);
-                histo[color_tmp] += 1;
-                // Aggiorna il top_color
-                if (histo[topColor] < histo[color_tmp]) topColor = color_tmp;
+                // Get the colour in the last column and update the histogram
+                auto colorTmp = src.at<uchar>(ty, newSlidingWindow.ex - 1);
+                histo[colorTmp] += 1;
+                // Update topColor
+                if (histo[topColor] < histo[colorTmp]) topColor = colorTmp;
             }
             slidingWindow = newSlidingWindow;
-            // Assegna il top color
+            // Assign top color
             out.at<uchar>(y, x) = topColor;
         }
     }
