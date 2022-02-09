@@ -13,7 +13,7 @@ def read_image(imgPath):
 
 class Segmentator:
     def __init__(self):
-        self.path = "./bin/SegmentatorApp.exe"
+        self.path = "./bin/SegmentatorApp"
 
     def segment(self, imagePath, **kwargs):
         command = f'{self.path} --in "{imagePath}" '
@@ -42,10 +42,11 @@ class Segmentator:
         extIdx = imgName.rfind(".")
         imgExt = imgName[extIdx:]
         imgName = imgName[:extIdx]
-        eyeNormPath = os.path.join(".tmp", imgName+"_eyeNorm" + imgExt)
-        eyePath = os.path.join(".tmp", imgName+"_eye" + imgExt)
-        eyeNormMaskPath = os.path.join(".tmp", imgName+"_eyeNormMask" + imgExt)
-        eyeMaskPath = os.path.join(".tmp", imgName+"_eyeMask" + imgExt)
+        outPath = kwargs['out']
+        eyeNormPath = os.path.join(outPath, imgName+"_eyeNorm" + imgExt)
+        eyePath = os.path.join(outPath, imgName+"_eye" + imgExt)
+        eyeNormMaskPath = os.path.join(outPath, imgName+"_eyeNormMask" + imgExt)
+        eyeMaskPath = os.path.join(outPath, imgName+"_eyeMask" + imgExt)
 
         if not os.path.exists(eyeNormPath):
             print("Segmentation process failed", file=sys.stderr)
@@ -67,4 +68,4 @@ class Segmentator:
 
 if __name__ == '__main__':
     segmentator = Segmentator()
-    segmentator.segment(sys.argv[1], **{"debug":True, "out":os.path.abspath("./.tmp"), "mode": "debug", "method": "isis"})
+    segmentator.segment(sys.argv[1], **{"debug":True, "out":os.path.abspath("./.tmp"), "mode": "debug", "method": "hough"})

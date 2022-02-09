@@ -5,3 +5,5 @@ build/**
 **/.DS_Store
 
 **/*.pth
+*.pth
+**/__pycache__

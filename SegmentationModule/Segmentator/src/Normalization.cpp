@@ -164,10 +164,19 @@ void normalizedMask(const cv::Mat& irisCroppedMask, cv::Mat& mask,
     const map<cv::Point, cv::Point>& mapCartPol)
 {
     mask = cv::Mat::zeros(normalizedSize, CV_8UC1);
+    
     for (int y = 0; y < mask.rows; y++)
         for (int x = 0; x < mask.cols; x++)
-            if ((int)irisCroppedMask.at<uchar>(mapCartPol.at(cv::Point(x, y))) == 255)
+        {
+            auto polar = mapCartPol.find(cv::Point(x, y));
+            //if (polar == mapCartPol.end()) continue;
+            //if (!inside(irisCroppedMask.size(), polar)) continue;
+            if ((int)irisCroppedMask.at<uchar>(polar->second) == 255)
+            {
                 mask.at<uchar>(y, x) = 255;
+            }
+        }
+    
 }
 
 NormalizedIris erb::normalizeIris(const cv::Mat& eye, const Iris& iris)

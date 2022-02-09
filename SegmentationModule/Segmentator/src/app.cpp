@@ -111,6 +111,8 @@ int main(int argc, const char* argv[])
         std::cout << "Limbus at: " << segmentation.iris.limbus << std::endl;
         std::cout << "Pupil at: " << segmentation.iris.pupil << std::endl;
         cv::imshow("Iris segmented", segmentation.irisNormalized.eye);
+        cv::imshow("Iris normalized", segmentation.irisNormalized.irisNormalized);
+        cv::imshow("Iris normalized mask", segmentation.irisNormalized.irisNormalizedMask);
         cv::waitKey();
     }
         break;

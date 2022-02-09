@@ -38,9 +38,9 @@ SegmentationData HoughSegmentator::Segment(const cv::Mat& src) const
 
 	iris.limbus = TransformCircle(iris.limbus, preprocessInfo.scale.to, preprocessInfo.scale.from);
 	iris.pupil = TransformCircle(iris.pupil, preprocessInfo.scale.to, preprocessInfo.scale.from);
-
-	img = src(preprocessInfo.crop.roi);
 	
+	img = src(preprocessInfo.crop.roi);
+
 	record.irisNormalized = normalizeIris(img, iris);
 	
 	return record;
@@ -94,17 +94,15 @@ Circle HoughSegmentator::PupilCircle(const cv::Mat& img) const
 				// Median blur
 				cv::Mat medianImg;
 				cv::medianBlur(img, medianImg, 2 * median + 1);
-
 				// threshold
 				cv::Mat thresholdImg;
 				cv::threshold(medianImg, thresholdImg, threshold, 255, cv::THRESH_BINARY_INV);
-
+				
 				// Find contours
 				std::vector<std::vector<cv::Point>> contours;
 				cv::findContours(thresholdImg, contours, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_NONE);
 
 				cv::drawContours(thresholdImg, contours, -1, cv::Scalar(255), -1);
-
 				// Canny
 				auto edges = getEdges(thresholdImg);
 

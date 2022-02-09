@@ -9,7 +9,7 @@ from Models.VGGFE import VGGFE
 
 
 class IdentityVerifier:
-    def __init__(self, dataset : Dataset, acceptanceThreshold : float=2.3):
+    def __init__(self, dataset : Dataset, acceptanceThreshold : float=1.6):
         self.dataset = dataset
         self.segmentator = dataset.segmentator
         self.featureExtractor = dataset.featureExtractor
@@ -34,7 +34,6 @@ class IdentityVerifier:
             rowFeatures = row.reshape(1, -1)
             stacked = np.vstack((rowFeatures[:, :-1], probeFeatures.reshape(1, -1)))
             minDistance = min(minDistance, pdist(stacked, metric='euclidean')[0])
-        
         return minDistance < self.at
             
 
