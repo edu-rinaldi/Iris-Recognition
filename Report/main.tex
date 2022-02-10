@@ -152,10 +152,10 @@ At the end of this filtering process, as for pupil, the \textit{new} mean circle
 Since the project focuses more on feature extraction and since the methods proposed are fairly recent and therefore seem to be underused, this section will be the one with the most detail.
 
 \bigskip
-All code concerning this section and the evaluation phase can be found in the python notebook \texttt{"Iris Feature Extraction.ipynb"}, together with the code various explanations of each step are given.
+All code concerning this section and the evaluation phase can be found in the python notebook \texttt{"iris-feature-extraction.ipynb"}, together with the code various explanations of each step are given.
 
 \subsection{Preface} 
-Initially, the idea was to use pretrained networks such as \textit{vgg}, \textit{densenet} and \textit{resnet} and then perform a fine-tuning operation for the proposed dataset. This idea was immediately catalogued as a failure for two main reasons:
+Initially, the idea was to use pretrained networks such as \textit{vgg}\cite{simonyan2015deep}, \textit{densenet} and \textit{resnet} and then perform a fine-tuning operation for the proposed dataset. This idea was immediately catalogued as a failure for two main reasons:
 \begin{itemize}
     \item for each class there are very \textbf{few examples} (about 5), not enough even for a small fine-tuning process
     \item if a new subject is added to gallery we need to retrain the whole model (this occurs only if these models are used as ``end" classifiers)
@@ -188,10 +188,10 @@ The goal of training is not to know what an elephant is and what a tiger is but 
 Let's now go back to our example; when the model sees the pair of images in figure \ref{fig:exampleTP} it does not know they are squirrels (we didn't train the model to recognize the class). However, the model can tell you with high confidence that they are the same kind of objects. This technique seems to be \textbf{well suited for biometric recognition models}.
 
 \subsubsection{Siamese Networks}
-A possible implementation of few-shot learning is through to the concept of Siamese networks \cite{koch2015siamese}, which consists of twin networks (generally two or three) which accept distinct inputs but are joined by an energy function and they share the same weights, this guarantees that two extremely similar images are not mapped by each network to very different locations in feature space because each network computes the same function. After the training phase we can then extract the network used at the base, i.e. the one that produces the feature vector, and use it as a ``feature extractor" (I will use this term in the next sections to refer to the network at the base).
+A possible implementation of few-shot learning is through the concept of Siamese networks \cite{koch2015siamese}, which consists of \textbf{twin networks} (generally two or three) which accept distinct inputs but are joined by an energy function and they \textbf{share the same weights}, this guarantees that two extremely similar images are not mapped by each network to very different locations in feature space because each network computes the same function. After the training phase we can then extract the network used at the base, i.e. the one that produces the feature vector, and use it as a ``feature extractor" (I will use this term in the next sections to refer to the network at the base).
 
 \bigskip
-For this project I decided to try two different architectures of siamese networks: \textbf{pair siamese networks} and \textbf{triplet siamese network}, both based on conv. neural networks.
+For this project I decided to try two different architectures of siamese networks: \textbf{pair siamese network} and \textbf{triplet siamese network}, both based on conv. neural networks.
 
 \paragraph{Pair siamese networks}
 
@@ -213,7 +213,7 @@ where:
 \end{figure}
 
 \paragraph{Triplet siamese networks}
-During training process, an image triplet $<I_a, I_p, I_n>$ is fed into the model as a single sample, where $I_a$, $I_p$ and $I_n$ represent the anchor, postive and negative images respectively. The idea behind is that distance between anchor and positive images should be smaller than that between anchor and negative images.
+During training process, an image triplet $<I_a, I_p, I_n>$ is fed into the model as a single sample, where $I_a$, $I_p$ and $I_n$ represent the anchor, postive and negative images respectively. The idea behind is that distance between anchor and positive images should be smaller than between anchor and negative images.
 The loss function used is called \textit{triplet loss}:
 
 $$max(\left\| f_a - f_p\right\|^2 - \left\| f_a - f_n\right\|^2 + m, 0) $$
@@ -250,7 +250,10 @@ For the evaluation phase I measured the performance of the different models on:
     \item \textbf{All-vs-all identification} open-set multiple template, obtaining the following main informations: \textit{FAR}, \textit{FRR}, \textit{EER}, \textit{DIR} (Detection and Identication Rate) and \textit{CMS} (Cumulative Match Score)
 \end{itemize}
 
-To simplify the test phase, I calculated the distance matrix between all samples in the test set, using the Euclidean distance (distance values are not normalized). In the following sections the results obtained for each model will be presented.
+To simplify the test phase, I calculated the distance matrix between all samples in the test set, using the \textbf{Euclidean distance} (distance values are not normalized). Immediately after that I used the algorithms seen in the lecture for the verification phase and the identification phase, using not the eye id but the subject id as the label. 
+
+\bigskip
+In the following sections the results obtained for each model will be presented.
 
 \subsection{\texttt{vggFEPretrained}}
 \begin{figure}[H]
@@ -333,6 +336,7 @@ Since time was limited and I didn't have any colleagues to work with, I had to c
 \begin{itemize}
     \item Train and test all 4 feature extractors on a mixed dataset (e.g. \textit{Ubiris} + \textit{Utiris} + \textit{MICHE})
     \item Plug different feature extractors: could be a different pretrained network (e.g. densenet), or a custom network to train from scratch
+    \item Plug a different iris segmentation module
 \end{itemize}
 \printbibliography
 \end{document}
