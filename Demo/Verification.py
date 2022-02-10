@@ -10,7 +10,7 @@ from Models.FeatNetFE import FeatNet
 
 
 class IdentityVerifier:
-    def __init__(self, dataset : Dataset, acceptanceThreshold : float=1.6):
+    def __init__(self, dataset : Dataset, acceptanceThreshold : float=1.7):
         self.dataset = dataset
         self.segmentator = dataset.segmentator
         self.featureExtractor = dataset.featureExtractor

@@ -16,6 +16,7 @@ class Segmentator:
         self.path = "./bin/SegmentatorApp"
 
     def segment(self, imagePath, **kwargs):
+        imagePath = os.path.abspath(imagePath)
         command = f'{self.path} --in "{imagePath}" '
         flagMode = False
         if 'method' in kwargs:
