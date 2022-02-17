@@ -81,14 +81,14 @@ int main(int argc, const char* argv[])
         return -1;
     }
 
-    erb::Segmentator* segmentator;
+    std::unique_ptr<erb::Segmentator> segmentator;
     switch (params.segmentationMethod)
     {
     case SegmentationMethod::HOUGH:
-        segmentator = &hough::HoughSegmentator(params.scaleSize);
+        segmentator = std::unique_ptr<erb::Segmentator>(new hough::HoughSegmentator(params.scaleSize));
         break;
     case SegmentationMethod::ISIS:
-        segmentator = &isis::IsisSegmentator(params.scaleSize);
+        segmentator = std::unique_ptr<erb::Segmentator>(new isis::IsisSegmentator(params.scaleSize));
         break;
     }
 
@@ -153,7 +153,6 @@ int main(int argc, const char* argv[])
     }
         break;
     }
-
-	
+    // delete segmentator;
 	return 0;
 }

@@ -179,7 +179,7 @@ void normalizedMask(const cv::Mat& irisCroppedMask, cv::Mat& mask,
     
 }
 
-NormalizedIris erb::normalizeIris(const cv::Mat& eye, const Iris& iris)
+NormalizedIris normalizeIris(const cv::Mat& eye, const Iris& iris)
 {
     NormalizedIris record;
     record.eye = eye;

@@ -1,0 +1,6 @@
+importlib_metadata==4.11.1
+numpy==1.22.2
+pandas==1.4.1
+scipy==1.8.0
+torch==1.10.2
+torchvision==0.11.3

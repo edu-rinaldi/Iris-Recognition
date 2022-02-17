@@ -155,6 +155,9 @@ std::vector<cv::Vec3f> filterCircles(std::vector<cv::Vec3f>& circles)
 	std::vector<cv::Vec3f> filteredPos;
 	std::vector<cv::Vec3f> filtered;
 	float ratio = 1.5;
+	
+	#ifdef USE_PARALLEL_ALGORITHM
+
 	std::mutex m;
 	std::for_each(std::execution::par, circles.begin(), circles.end(), [&](auto& circle)
 	{
@@ -168,6 +171,20 @@ std::vector<cv::Vec3f> filterCircles(std::vector<cv::Vec3f>& circles)
 			filteredPos.push_back(circle);
 		}
 	});
+
+	#else
+	for(const auto& circle : circles)
+	{
+		auto meanCenter = cv::Vec2i(mean[0], mean[1]);
+		auto stdCenter = cv::Vec2i(std[0], std[1]);
+		auto tmp1 = meanCenter - ratio * stdCenter;
+		auto tmp2 = meanCenter + ratio * stdCenter;
+		if (!(circle[0] < tmp1[0] || circle[0] > tmp2[0] || circle[1] < tmp1[1] || circle[1] > tmp2[1]))
+		{
+			filteredPos.push_back(circle);
+		}
+	}
+	#endif
 	if (filteredPos.size() < 3) filtered = filteredPos;
 	else
 	{
@@ -177,13 +194,22 @@ std::vector<cv::Vec3f> filterCircles(std::vector<cv::Vec3f>& circles)
 		float maxRadius = alphaRadius + filteredStd[2];
 		float minRadius = alphaRadius - filteredStd[2];
 		//std::mutex m;
+		
+		#ifdef USE_PARALLEL_ALGORITHM
 		auto it = std::remove_if(circles.begin(), circles.end(), [&](auto& circle) {return !(circle[2] >= minRadius && circle[2] <= maxRadius); });
-		std::atomic_int idx = 0;
 		filtered.resize(static_cast<int>(std::distance(circles.begin(), it)));
+		std::atomic_int idx = 0;
 		std::for_each(std::execution::par, circles.begin(), it, [&](auto& circle)
 		{
 			filtered[idx.fetch_add(1)] = circle;
 		});
+		#else
+		for(auto& circle : circles)
+		{
+			if(circle[2] >= minRadius && circle[2] <= maxRadius)
+				filtered.push_back(circle);
+		}
+		#endif
 	}
 	return filtered;
 }
@@ -225,6 +251,7 @@ Circle HoughSegmentator::LimbusCircle(const cv::Mat& img, const Circle& pupil, i
 
 				if (!circles.empty())
 				{
+					#ifdef USE_PARALLEL_ALGORITHM
 					std::mutex m;
 					// Filter and push circles
 					std::for_each(std::execution::par, circles.begin(), circles.end(), [&](auto& circle)
@@ -235,6 +262,15 @@ Circle HoughSegmentator::LimbusCircle(const cv::Mat& img, const Circle& pupil, i
 							limbusCircles.push_back(circle);
 						}
 					});
+					#else
+					for(auto& circle : circles)
+					{
+						if (circle[2] > radiusRange && inside({ centerRange, pupil.center }, cv::Vec2i(circle[0], circle[1])))
+						{
+							limbusCircles.push_back(circle);
+						}
+					}
+					#endif
 				}
 			}
 		}

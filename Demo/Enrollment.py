@@ -1,6 +1,5 @@
 import sys, os, shutil
 import argparse
-from ast import arg
 
 
 from Segmentation.Segmentation import Segmentator

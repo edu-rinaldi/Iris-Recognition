@@ -40,7 +40,6 @@ CropEyeInfo manualCrop(const cv::Mat& src, cv::Mat& out)
     CropEyeInfo info;
     info.roi = src.cols > src.rows ? cv::Rect(src.cols * 0.5 - src.rows * 0.5, 0, src.rows, src.rows) :
         cv::Rect(0, src.rows * 0.5 - src.cols * 0.5, src.cols, src.cols);
-    
     out = src(info.roi);
     info.success = true;
     return info;
@@ -53,7 +52,7 @@ ScaleEyeInfo scaleImage(const cv::Mat& src, cv::Mat& out, int finalSize)
     info.to = info.from;
     
     double sf = (double)finalSize / std::max(src.cols, src.rows);
-    info.to = cv::Size((int)src.size().width * sf, (int)src.size().height * sf);
+    info.to = cv::Size((int)(src.size().width * sf), (int)(src.size().height * sf));
     cv::resize(src, out, info.to);
     
     //info.success = src.cols > finalSize || src.rows > finalSize;

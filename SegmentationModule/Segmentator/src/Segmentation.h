@@ -22,6 +22,7 @@ struct SegmentationData
 class Segmentator
 {
 public:
+	virtual ~Segmentator() = default; 
 	virtual SegmentationData Segment(const cv::Mat& img) const = 0;
 protected:
 	/*

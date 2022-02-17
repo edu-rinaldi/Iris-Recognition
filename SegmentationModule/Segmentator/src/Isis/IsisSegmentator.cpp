@@ -4,6 +4,7 @@
 #include <algorithm>
 #include <execution>
 
+
 namespace isis
 {
 IsisSegmentator::IsisSegmentator(int finalSize) : mFinalSize(finalSize)
@@ -156,25 +157,41 @@ void findCirclesTaubin(const cv::Mat& mat, std::vector<Circle>& outputCircles, d
 		std::vector<std::vector<cv::Point>> contours;
 		std::vector<cv::Vec4i> hierarchy;
 		cv::findContours(cannyRes, contours, hierarchy, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_TC89_KCOS);
+		
+		#ifdef USE_PARALLEL_ALGORITHM
 		std::mutex m;
 		std::for_each(std::execution::par, contours.begin(), contours.end(), [&](auto& contour)
-			{
-				// controlla cerchio
-				if (contour.size() <= 5) return;
-				Circle circle = taubin(contour);
+		{
+			// controlla cerchio
+			if (contour.size() <= 5) return;
+			Circle circle = taubin(contour);
 
-				if (circle.inside(mat) && circle.radius >= minRadius && circle.radius <= maxRadius)
-				{
-					std::lock_guard<std::mutex> guard(m);
-					outputCircles.push_back(circle);
-				}
-			});
+			if (circle.inside(mat) && circle.radius >= minRadius && circle.radius <= maxRadius)
+			{
+				std::lock_guard<std::mutex> guard(m);
+				outputCircles.push_back(circle);
+			}
+		});
+		#else
+		for(const auto& contour : contours)
+		{
+			// controlla cerchio
+			if (contour.size() <= 5) return;
+			Circle circle = taubin(contour);
+
+			if (circle.inside(mat) && circle.radius >= minRadius && circle.radius <= maxRadius)
+			{
+				outputCircles.push_back(circle);
+			}
+		}
+		#endif
 	}
 }
 
 CircleSearchRecord findLimbus(const cv::Mat& mat, const std::vector<Circle>& circles)
 {
 	CircleSearchRecord bestCircle;
+	#ifdef USE_PARALLEL_ALGORITHM
 	std::mutex m;
 	std::for_each(std::execution::par, circles.begin(), circles.end(), [&](auto& circle)
 	{
@@ -187,7 +204,18 @@ CircleSearchRecord findLimbus(const cv::Mat& mat, const std::vector<Circle>& cir
 		if (bestCircle.circle.radius == 0 || bestCircle.score < score)
 			bestCircle = { circle, score };
 	});
-
+	#else
+	for(const auto& circle : circles)
+	{
+		// homogeneity
+		double homogeneityScore = homogeneity(mat, circle);
+		// separability
+		double separabilityScore = separability(mat, circle);
+		double score = homogeneityScore + separabilityScore;
+		if (bestCircle.circle.radius == 0 || bestCircle.score < score)
+			bestCircle = { circle, score };
+	}
+	#endif
 	return bestCircle;
 }
 
@@ -220,6 +248,7 @@ CircleSearchRecord findPupil(const cv::Mat& mat, std::vector<Circle>& circles, c
 
 	Circle defaultCircle = Circle{ static_cast<int>(limbus.radius / 4.f), cv::Vec2i(mat.cols / 2, mat.rows / 2) };
 	circles.push_back(defaultCircle);
+	#ifdef USE_PARALLEL_ALGORITHM
 	std::mutex m;
 	std::for_each(std::execution::par, circles.begin(), circles.end(), [&](auto& c)
 	{
@@ -229,7 +258,16 @@ CircleSearchRecord findPupil(const cv::Mat& mat, std::vector<Circle>& circles, c
 		std::lock_guard<std::mutex> guard(m);
 		if (score > bestCircle.score) bestCircle = { c, score };
 	});
+	#else
+	for(const auto& c : circles)
+	{
+		double homogeneityScore = homogeneity(mat, c);
+		double separabilityScore = separability(mat, c);
+		double score = homogeneityScore + separabilityScore;
 
+		if (score > bestCircle.score) bestCircle = { c, score };
+	}
+	#endif
 	if (bestCircle.circle.radius == 0)
 		bestCircle = { defaultCircle, homogeneity(mat, defaultCircle) + separability(mat, defaultCircle) };
 
