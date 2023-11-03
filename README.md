@@ -2,12 +2,12 @@
 This project concerns the creation of a complete biometric system, based entirely on the use of iris images (in visible wavelength). 
 
 The project is mainly structured in **two modules**:
-- **Segmentation**: the *"ISis v.2"* method and the *"Hough approach"* method are proposed (code visible in "`SegmentationModule`" directory).
-- **Feature extraction**: several models based on CNNs are proposed, finetuned and trained using a *few-shot learning* approach, through *siamese networks* (code visible in "`Notebook`" directory).
+- **Segmentation**: the *"ISis v.2"* method and the *"Hough approach"* methods are proposed (code is visible in "`SegmentationModule`" directory).
+- **Feature extraction**: several models based on CNNs are proposed, finetuned and trained using a *few-shot learning* approach, through *siamese networks* (code is visible in "`Notebook`" directory).
 
 ![Base schema](Report/imgs/MainPipeline.png)
 
-This project also includes the implementation of a **"demo"** of the proposed system based on a subset of the proposed models, namely *"Hough approach"* for segmentation and *"featNet"* trained from scratch for feature extraction (code visible in "`Demo`" directory).
+This project also includes the implementation of a **"demo"** of the proposed system based on a subset of the proposed models, namely *"Hough approach"* for segmentation and *"featNet"* trained from scratch for feature extraction (code is visible in "`Demo`" directory).
 
 ## Important note
 In each directory there is a more specific `README.md` file, containing detailed information on how to use that specific code (e.g. in `Segmentation` directory is explained how to compile the code and how it's structured)
